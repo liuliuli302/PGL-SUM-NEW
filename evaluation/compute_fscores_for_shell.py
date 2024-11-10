@@ -1,4 +1,5 @@
 # 以上述代码为参考，写一个计算单个summary分数的函数
+import argparse
 import json
 from os import listdir
 import h5py
@@ -95,6 +96,13 @@ def process_scores(scores: np.ndarray, sample_interval: int, nframes: int):
             score_processed[pos_left:pos_right] = scores[i]
     
     return score_processed
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    # Required argument
+    parser.add_argument("root_path", type=str, required=True)
 
 
 # 示例用法

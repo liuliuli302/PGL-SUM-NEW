@@ -11,9 +11,8 @@
             "program": "${workspaceFolder}/evaluation/compute_fscores_for_shell.py",
             "console": "integratedTerminal",
             "args": [
-                "--root_path", "/home/allets/workspace/PGL-SUM-NEW/data",
+                "--root_path", "/home/allets/workspace/PGL-SUM-NEW/data/datasets",
                 "--dataset_name", "SumMe",
-                "--output_dir", "/home/allets/workspace/PGL-SUM-NEW/data/datasets/SumMe/output"
             ]
         },
         {

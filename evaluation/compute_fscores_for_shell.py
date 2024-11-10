@@ -104,7 +104,6 @@ def parse_args():
     # Required argument
     parser.add_argument("--root_path", type=str, required=True)
     parser.add_argument("--dataset_name", type=str, required=True)
-    parser.add_argument("--output_dir", type=str, required=True)
 
     # Optional arguments with defaults
     parser.add_argument("--frame_interval", type=int, default=16)
@@ -114,7 +113,6 @@ def parse_args():
 
 def main(
     root_path: str,
-    output_dir: str,
     dataset_name: str,
     frame_interval: int,
 ):
@@ -124,12 +122,14 @@ def main(
     dataset_dir = Path(root_path, dataset_name)
     scores_dir = Path(dataset_dir, "scores")
     splits_dir = Path(dataset_dir, "splits")
+    output_dir = Path(dataset_dir, "output")
     h5py_file_path = Path(dataset_dir, h5py_file_name)
+    output_file_path = Path(output_dir, "result.json")
 
-    hdf = h5py.File(dataset_dir, "r")
+    hdf = h5py.File(h5py_file_path, "r")
 
     # Get the video names
-    video_names = listdir(scores_dir)
+    file_names = listdir(scores_dir)
 
     # Get the video name dictionary
     video_name_dict = get_video_name_dict(hdf)
@@ -138,10 +138,13 @@ def main(
     results = {}
     
     # Iterate over the videos
-    for video_name in video_names:
+    for file_name in file_names:
+
+        video_name = file_name.split(".")[0]
+        video_index_name = video_name_dict[video_name]
         # Get the ground truth summary
         user_summary, shot_bound, n_frames, positions = get_gt(
-            hdf=hdf, video_name=video_name
+            hdf=hdf, video_name=video_index_name
         )
 
         # Read the importance scores
@@ -167,8 +170,15 @@ def main(
         # Store the result
         results[video_name] = f_score
 
+        # Print the result
+        print(f"{video_name}: {f_score}")
+
+    # Calculate the average f_score and save it
+    avg_f_score = np.mean(list(results.values()))
+    results["average_f_score"] = avg_f_score
+
     # Save the results
-    with open(output_dir + "/results.json", "w") as file:
+    with open(output_file_path, "w") as file:
         json.dump(results, file, indent=4)
 
 
@@ -178,40 +188,6 @@ if __name__ == "__main__":
     args = parse_args()
     main(
         root_path=args.root_path,
-        output_dir=args.output_dir,
         dataset_name=args.dataset_name,
         frame_interval=args.frame_interval,
-        video_fps=args.video_fps,
     )
-
-    # result_path = (
-    #     "../PGL-SUM-Modify/Summaries/PGL-SUM/exp1/SumMe/results/split0/SumMe_155.json"
-    # )
-    # dataset_path = (
-    #     "../PGL-SUM-Modify/data/datasets/SumMe/eccv16_dataset_summe_google_pool5.h5"
-    # )
-    # dataset = "SumMe"
-    # eval_method = "max"
-    # with open(result_path) as f:  # read the json file ...
-    #     data = json.loads(f.read())
-    #     keys = list(data.keys())
-    #     hdf = h5py.File(dataset_path, "r")
-    #     for video_name in keys:  # for each video inside that json file ...
-    #         scores = np.asarray(
-    #             data[video_name]
-    #         )  # read the importance scores from frames
-    #         user_summary, shot_bound, n_frames, positions, video_name_dict = get_gt(
-    #             hdf=hdf, video_name=video_name
-    #         )
-    #         score_processed = process_scores(
-    #             scores=scores, sample_interval=15, nframes=n_frames
-    #         )
-    #         f_score = compute_single_summary_score(
-    #             score_processed,
-    #             shot_bound,
-    #             n_frames,
-    #             positions,
-    #             user_summary,
-    #             eval_method,
-    #         )
-    #         print(f"{video_name}:{f_score}")

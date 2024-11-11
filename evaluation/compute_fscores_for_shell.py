@@ -8,6 +8,7 @@ import numpy as np
 import pprint
 from evaluation_metrics import evaluate_summary
 from generate_summary import generate_single_summary
+import scipy.io as scio
 
 
 def compute_single_summary_score(
@@ -94,8 +95,22 @@ def process_scores(scores: np.ndarray, frame_interval: int, nframes: int):
             score_processed[pos_left:-1] = scores[i]
         else:
             score_processed[pos_left:pos_right] = scores[i]
-    
+
     return score_processed
+
+
+def get_tvsum_video_name_dict_from_matfile(mat_file_path: str):
+    # load mat file from mat_file_path
+    mat_file = h5py.File(mat_file_path, "r")
+    tvsum50_video_name = mat_file['tvsum50']["video"][:]
+    video_name_dict = {}
+    for i, ref_array in enumerate(tvsum50_video_name):
+        for ref in ref_array:
+            name = mat_file[ref]
+            str_values = ''.join(chr(val[0]) for val in name)
+            video_name_dict[str_values] = f"video_{i+1}"
+    # pprint.pprint(video_name_dict)
+    return video_name_dict
 
 
 def parse_args():
@@ -104,10 +119,11 @@ def parse_args():
     # Required argument
     parser.add_argument("--root_path", type=str, required=True)
     parser.add_argument("--dataset_name", type=str, required=True)
+    parser.add_argument("--eval_method", type=str, required=True)
 
     # Optional arguments with defaults
     parser.add_argument("--frame_interval", type=int, default=16)
-    
+
     return parser.parse_args()
 
 
@@ -115,10 +131,11 @@ def main(
     root_path: str,
     dataset_name: str,
     frame_interval: int,
+    eval_method: str
 ):
     # Get paths needed.
     h5py_file_name = "eccv16_dataset_" + dataset_name.lower() + "_google_pool5.h5"
-    
+
     dataset_dir = Path(root_path, dataset_name)
     scores_dir = Path(dataset_dir, "scores")
     splits_dir = Path(dataset_dir, "splits")
@@ -128,15 +145,24 @@ def main(
 
     hdf = h5py.File(h5py_file_path, "r")
 
+    # Create paths if dont exits
+    if not output_dir.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
+
     # Get the video names
     file_names = listdir(scores_dir)
 
     # Get the video name dictionary
-    video_name_dict = get_video_name_dict(hdf)
+    if dataset_name == "TVSum":
+        video_name_dict = get_tvsum_video_name_dict_from_matfile(
+            mat_file_path=Path(dataset_dir, "ydata-tvsum50.mat")
+        )
+    else:
+        video_name_dict = get_video_name_dict(hdf)
 
     # Initialize the results dictionary
     results = {}
-    
+
     # Iterate over the videos
     for file_name in file_names:
 
@@ -152,9 +178,7 @@ def main(
         scores = read_and_process_json(json_file_path)
 
         scores = process_scores(
-            scores=scores,
-            frame_interval=frame_interval,
-            nframes=n_frames
+            scores=scores, frame_interval=frame_interval, nframes=n_frames
         )
 
         # Compute the f_score
@@ -164,7 +188,7 @@ def main(
             n_frames=n_frames,
             positions=positions,
             user_summary=user_summary,
-            eval_method="max",
+            eval_method=eval_method,
         )
 
         # Store the result
@@ -182,7 +206,6 @@ def main(
         json.dump(results, file, indent=4)
 
 
-
 # 示例用法
 if __name__ == "__main__":
     args = parse_args()
@@ -190,4 +213,5 @@ if __name__ == "__main__":
         root_path=args.root_path,
         dataset_name=args.dataset_name,
         frame_interval=args.frame_interval,
+        eval_method=args.eval_method
     )

@@ -11,8 +11,9 @@
             "program": "${workspaceFolder}/evaluation/compute_fscores_for_shell.py",
             "console": "integratedTerminal",
             "args": [
-                "--root_path", "/home/allets/workspace/PGL-SUM-NEW/data/datasets",
-                "--dataset_name", "SumMe",
+                "--root_path", "${env:HOME}/workspace/PGL-SUM-NEW/data/datasets",
+                "--dataset_name", "TVSum",
+                "--eval_method", "max"
             ]
         },
         {

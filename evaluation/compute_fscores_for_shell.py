@@ -102,12 +102,12 @@ def process_scores(scores: np.ndarray, frame_interval: int, nframes: int):
 def get_tvsum_video_name_dict_from_matfile(mat_file_path: str):
     # load mat file from mat_file_path
     mat_file = h5py.File(mat_file_path, "r")
-    tvsum50_video_name = mat_file['tvsum50']["video"][:]
+    tvsum50_video_name = mat_file["tvsum50"]["video"][:]
     video_name_dict = {}
     for i, ref_array in enumerate(tvsum50_video_name):
         for ref in ref_array:
             name = mat_file[ref]
-            str_values = ''.join(chr(val[0]) for val in name)
+            str_values = "".join(chr(val[0]) for val in name)
             video_name_dict[str_values] = f"video_{i+1}"
     # pprint.pprint(video_name_dict)
     return video_name_dict
@@ -127,12 +127,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main(
-    root_path: str,
-    dataset_name: str,
-    frame_interval: int,
-    eval_method: str
-):
+def main(root_path: str, dataset_name: str, frame_interval: int, eval_method: str):
     # Get paths needed.
     h5py_file_name = "eccv16_dataset_" + dataset_name.lower() + "_google_pool5.h5"
 
@@ -213,5 +208,5 @@ if __name__ == "__main__":
         root_path=args.root_path,
         dataset_name=args.dataset_name,
         frame_interval=args.frame_interval,
-        eval_method=args.eval_method
+        eval_method=args.eval_method,
     )

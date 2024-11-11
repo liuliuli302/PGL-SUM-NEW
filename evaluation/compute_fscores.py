@@ -84,7 +84,3 @@ for epoch in results:  # for each epoch ...
 # Save the importance scores in txt format.
 with open(path + "/f_scores.txt", "w") as outfile:
     json.dump(f_score_epochs, outfile)
-
-
-
-

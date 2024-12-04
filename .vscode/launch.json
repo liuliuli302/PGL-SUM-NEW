@@ -31,7 +31,7 @@
             "console": "integratedTerminal",
             "args": [
                 "--path",
-                "/home/insight/workspace/PGL-SUM-Modify/Summaries/PGL-SUM/exp1/SumMe/results/split0",
+                "/home/insight/workspace/PGL-SUM-NEW/Summaries/PGL-SUM/exp1/SumMe/results/split0",
                 "--dataset",
                 "SumMe",
                 "--eval",

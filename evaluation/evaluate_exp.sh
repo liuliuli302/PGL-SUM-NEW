@@ -3,7 +3,7 @@
 # The script is taking as granted that the experiments are saved under "base_path" as "base_path/exp$EXP_NUM".
 # First, -for each split- get the training loss from tensorboard as csv file. Then, compute the fscore (txt file)
 # for the current experiment. Finally, based ONLY on the training loss choose the best epoch (and model).
-base_path="../PGL-SUM-Modify/Summaries/PGL-SUM"
+base_path="../PGL-SUM-NEW/Summaries/PGL-SUM"
 exp_num=$1
 dataset=$2
 eval_method=$3  # SumMe -> max | TVSum avg

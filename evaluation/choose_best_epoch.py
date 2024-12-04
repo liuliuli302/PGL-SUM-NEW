@@ -8,10 +8,10 @@ import sys
 # with args (example usage: python choose_best_epoch.py <path_to_experiment> TVSum)
 exp_path = sys.argv[1]
 dataset = sys.argv[2]
-''' without args
-exp_path = "../PGL-SUM-Modify/Summaries/PGL-SUM/exp1"
+""" without args
+exp_path = "../PGL-SUM-NEW/Summaries/PGL-SUM/exp1"
 dataset = "SumMe"
-'''
+"""
 
 
 def train_logs(log_file):
@@ -28,8 +28,8 @@ def train_logs(log_file):
 
     # Read the csv file with the training losses
     with open(log_file) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for (i, row) in enumerate(csv_reader):
+        csv_reader = csv.reader(csv_file, delimiter=",")
+        for i, row in enumerate(csv_reader):
             if i == 0:
                 for col in range(len(row)):
                     losses[row[col]] = []
@@ -43,32 +43,38 @@ def train_logs(log_file):
 
     START_EPOCH, tol = 15, 1
     cand_epoch, cand_val = 0, 0
-    for i in range(START_EPOCH, len(loss)-1):
-        diff = (loss[i+1]-loss[i])/loss[i+1] * 100
+    for i in range(START_EPOCH, len(loss) - 1):
+        diff = (loss[i + 1] - loss[i]) / loss[i + 1] * 100
         if diff <= -tol:
-            cand_epoch = i+1  # take the next epoch from that good (negative) change in the loss curve
+            cand_epoch = (
+                i + 1
+            )  # take the next epoch from that good (negative) change in the loss curve
             cand_val = diff
             break
         if diff >= tol:
-            cand_epoch = i    # take the previous epoch from that bad (positive) change in the loss curve
+            cand_epoch = i  # take the previous epoch from that bad (positive) change in the loss curve
             cand_val = diff
             break
 
     # Find the absolute minimum
     criterion = torch.tensor(loss)
     argmin_epoch = torch.argmin(criterion).item()
-    argmin_diff = (loss[argmin_epoch]-loss[argmin_epoch-1])/loss[argmin_epoch] * 100
+    argmin_diff = (
+        (loss[argmin_epoch] - loss[argmin_epoch - 1]) / loss[argmin_epoch] * 100
+    )
 
     if abs(argmin_diff) < abs(cand_val):
         epoch = argmin_epoch
     else:
         epoch = cand_epoch
-    return epoch+1
+    return epoch + 1
 
 
 all_fscores = np.zeros(5, dtype=float)
 for split in range(0, 5):
-    results_file = exp_path + "/" + dataset + "/results/split" + str(split) + "/f_scores.txt"
+    results_file = (
+        exp_path + "/" + dataset + "/results/split" + str(split) + "/f_scores.txt"
+    )
     log = exp_path + "/" + dataset + "/logs/split" + str(split) + "/scalars.csv"
 
     # read F-Scores
@@ -81,7 +87,9 @@ for split in range(0, 5):
         f_scores = [float(f_score) for f_score in f_scores]
         selected_epoch = train_logs(log)
         all_fscores[split] = np.round(f_scores[selected_epoch], 2)
-        print(f"Split: {split} -> Criterion Fscore: {all_fscores[split]} @ epoch: {selected_epoch}")
+        print(
+            f"Split: {split} -> Criterion Fscore: {all_fscores[split]} @ epoch: {selected_epoch}"
+        )
 
 avg_fscore = np.mean(all_fscores)
 print(f"Average Fscore: {avg_fscore}")

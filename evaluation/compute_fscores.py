@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "--path",
     type=str,
-    default="../PGL-SUM-Modify/Summaries/PGL-SUM/exp1/SumMe/results/split0",
+    default="../PGL-SUM-NEW/Summaries/PGL-SUM/exp1/SumMe/results/split0",
     help="Path to the json files with the scores of the frames for each epoch",
 )
 parser.add_argument("--dataset", type=str, default="SumMe", help="Dataset to be used")
@@ -31,7 +31,7 @@ eval_method = args["eval"]
 results = [f for f in listdir(path) if f.endswith(".json")]
 results.sort(key=lambda video: int(video[6:-5]))
 dataset_path = (
-    "../PGL-SUM-Modify/data/datasets/"
+    "../PGL-SUM-NEW/data/datasets/"
     + dataset
     + "/eccv16_dataset_"
     + dataset.lower()
